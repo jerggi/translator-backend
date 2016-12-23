@@ -1,24 +1,31 @@
 const fs = require('fs')
+const koa = require('koa');
+const app = koa();
+const router = require('./api/router');
+const createRoutes = require('./api/routes');
 
-// key - value storage ( in memory )
-const data = {}
-const fileStoragePath = './data.json'
+require('koa-validate')(app);
 
-const writeData = () => {
-  fs.writeFileSync(fileStoragePath, JSON.stringify(data))
-}
+const validator = require('koa-router-validator');
+const bodyparser = require('koa-bodyparser');
 
-const readData = () => {
-  Object.assign(data, JSON.parse(fs.readFileSync(fileStoragePath)))
-}
+const responseTime = require('./api/middlewares/responseTime');
 
 process.on('exit', (code) => {
   console.log('Process going to exit, writing in memory data to file');
   //writeData()
 });
 
-readData()
+createRoutes(router);
+router.use(responseTime());
 
-data['somekey'] = 'great value'
+app
+  .use(bodyparser())
+  .use(router.routes())
+  .use(router.allowedMethods());
+ 
+app.listen(3000);
 
-console.log(data)
+//data['somekey'] = 'great value'
+
+//console.log(data)
