@@ -4,10 +4,12 @@ const app = koa();
 const router = require('./api/router');
 const createRoutes = require('./api/routes');
 
+global._ = require('lodash');
+
 require('koa-validate')(app);
 
 const validator = require('koa-router-validator');
-const bodyparser = require('koa-bodyparser');
+const koaBody = require('koa-body');
 
 const responseTime = require('./api/middlewares/responseTime');
 
@@ -20,11 +22,16 @@ createRoutes(router);
 router.use(responseTime());
 
 app
-  .use(bodyparser())
+  .use(koaBody({
+    formidable:{uploadDir: './data'},
+    multipart: true,
+    urlencoded: true
+  }))
   .use(router.routes())
   .use(router.allowedMethods());
  
-app.listen(3000);
+app.listen(3000, () => console.log('server listening on port 3000'));
+
 
 //data['somekey'] = 'great value'
 

@@ -4,16 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "jergus fasanek",
   "license": "ISC",
   "dependencies": {
     "koa": "^1.2.4",
-    "koa-bodyparser": "^2.3.0",
+    "koa-body": "^1.6.0",
     "koa-router": "^5.4.0",
     "koa-router-validator": "^2.1.0",
-    "koa-validate": "^1.0.7"
+    "koa-validate": "^1.0.7",
+    "linebyline": "^1.3.0",
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
   }
 }
