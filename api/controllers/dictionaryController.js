@@ -1,15 +1,17 @@
-const fs = require('fs');
+const fs = require('fs')
 
-const storagePath = './data';
+const storagePath = './data'
 
 module.exports = {
     allDictionaries: () => {
-        const dictionaries = fs.readdirSync(storagePath);
+        const dictionaries = _.map(fs.readdirSync(storagePath), file => {
+            return file.substr(0, file.lastIndexOf('.'))
+        })
 
-        return dictionaries;
+        return dictionaries
     },
     getDictionary: (name) => {
-        const dictionary = fs.readFileSync(`${storagePath}/${name}.json`);
+        const dictionary = fs.readFileSync(`${storagePath}/${name}.dict`)
 
         return dictionary
     },
@@ -21,9 +23,9 @@ module.exports = {
         }
     },
     read: (file) => {
-        fs.readFile(`${storagePath}/test9.dict`, (err, data) => {
-            if (err) throw err;
-            console.log(data);
-        });
+        fs.readFile(`${storagePath}/${file}`, (err, data) => {
+            if (err) throw err
+            console.log(data)
+        })
     }
 }

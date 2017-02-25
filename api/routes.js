@@ -1,5 +1,6 @@
 const ctrl = require('./controllers/mainController');
 const dictionary = require('./controllers/dictionaryController');
+const wordCtrl = require('./controllers/wordController');
 
 const createRoutes = function (router) {
     router.get('/translate', function* (next) {
@@ -16,19 +17,64 @@ const createRoutes = function (router) {
     });
 
     router.post('/add-word', function* (next) {
+        this.checkBody('dict').notEmpty();
         this.checkBody('word').notEmpty();
-        this.checkBody('translation').notEmpty();
-        this.checkBody('dictionary').notEmpty();
+        this.checkBody('translations').notEmpty();
+
         if (this.errors) {
             this.body = this.errors;
             this.status = 400;
             return;
         }
 
+        const { dict, word, translations } = this.request.body;
+
+        const result = wordCtrl.addWord(dict, word, translations);
         this.body = 'OK';
+        this.status = result.code;
 
         yield next;
     });
+
+    router.put('/change-word', function* (next) {
+        this.checkBody('dict').notEmpty();
+        this.checkBody('word').notEmpty();
+        this.checkBody('newWord').notEmpty();
+        this.checkBody('newTranslation').notEmpty();
+
+        if (this.errors) {
+            this.body = this.errors;
+            this.status = 400;
+            return;
+        }
+
+        const { dict, word, newWord, newTranslation } = this.request.body;
+
+        const result = wordCtrl.changeWord(dict, word, newWord, newTranslation);
+    })
+
+    router.put('/change-translation', function* (next) {
+        this.checkBody('dict').notEmpty();
+        this.checkBody('word').notEmpty();
+        this.checkBody('newTranslation').notEmpty();
+
+        if (this.errors) {
+            this.body = this.errors;
+            this.status = 400;
+            return;
+        }
+    })
+
+    router.delete('/delete-word', function* (next) {
+        this.checkBody('dict').notEmpty();
+        this.checkBody('word').notEmpty();
+
+        if (this.errors) {
+            this.body = this.errors;
+            this.status = 400;
+            return;
+        }
+    })
 
     router.get('/dictionary', function* (next) {
         this.body = dictionary.allDictionaries();
