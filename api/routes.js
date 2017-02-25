@@ -75,19 +75,15 @@ const createRoutes = function (router) {
     })
 
     router.delete('/delete-word/:dict/:word', function* (next) {
-        this.checkParams('dict').notEmpty();
-        this.checkParams('word').notEmpty();
-
-        if (this.errors) {
-            this.body = this.errors;
-            this.status = 400;
-            return;
-        }
-
         const { dict, word } = this.params;
 
         const result = wordCtrl.deleteWord(dict, word);
         this.status = result.code;
+
+        if (result.error) {
+            this.body = result;
+            this.status = result.code;
+        }
 
         yield next;
     })

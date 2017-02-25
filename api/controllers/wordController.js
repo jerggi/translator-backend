@@ -42,9 +42,13 @@ module.exports = {
     deleteWord: (dict, word) => {
         const dicts = data()
 
-        if (!data[dict]) {
+        if (!dicts[dict]) {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
+
+        delete dicts[dict][word]
+
+        console.log(dicts[dict])
 
         return { code: codes.NO_CONTENT }
     }
