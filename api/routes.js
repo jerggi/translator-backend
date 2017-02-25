@@ -30,7 +30,6 @@ const createRoutes = function (router) {
         const { dict, word, translations } = this.request.body;
 
         const result = wordCtrl.addWord(dict, word, translations);
-        this.body = 'OK';
         this.status = result.code;
 
         yield next;
@@ -40,7 +39,7 @@ const createRoutes = function (router) {
         this.checkBody('dict').notEmpty();
         this.checkBody('word').notEmpty();
         this.checkBody('newWord').notEmpty();
-        this.checkBody('newTranslation').notEmpty();
+        this.checkBody('newTranslations').notEmpty();
 
         if (this.errors) {
             this.body = this.errors;
@@ -48,32 +47,49 @@ const createRoutes = function (router) {
             return;
         }
 
-        const { dict, word, newWord, newTranslation } = this.request.body;
+        const { dict, word, newWord, newTranslations } = this.request.body;
 
-        const result = wordCtrl.changeWord(dict, word, newWord, newTranslation);
+        const result = wordCtrl.changeWord(dict, word, newWord, newTranslations);
+        this.status = result.code;
+
+        yield next;
     })
 
     router.put('/change-translation', function* (next) {
         this.checkBody('dict').notEmpty();
         this.checkBody('word').notEmpty();
-        this.checkBody('newTranslation').notEmpty();
+        this.checkBody('newTranslations').notEmpty();
 
         if (this.errors) {
             this.body = this.errors;
             this.status = 400;
             return;
         }
+
+        const { dict, word, newTranslations } = this.request.body;
+
+        const result = wordCtrl.changeTranslations(dict, word, newTranslations);
+        this.status = result.code;
+
+        yield next;
     })
 
-    router.delete('/delete-word', function* (next) {
-        this.checkBody('dict').notEmpty();
-        this.checkBody('word').notEmpty();
+    router.delete('/delete-word/:dict/:word', function* (next) {
+        this.checkParams('dict').notEmpty();
+        this.checkParams('word').notEmpty();
 
         if (this.errors) {
             this.body = this.errors;
             this.status = 400;
             return;
         }
+
+        const { dict, word } = this.params;
+
+        const result = wordCtrl.deleteWord(dict, word);
+        this.status = result.code;
+
+        yield next;
     })
 
     router.get('/dictionary', function* (next) {
