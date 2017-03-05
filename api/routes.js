@@ -3,131 +3,117 @@ const dictionary = require('./controllers/dictionaryController');
 const wordCtrl = require('./controllers/wordController');
 
 const createRoutes = function (router) {
-    router.get('/translate', function* (next) {
-        this.checkQuery('word').notEmpty();
-        if (this.errors) {
-            this.body = this.errors;
-            this.status = 400;
-            return;
-        }
-        
-        this.body = ctrl.findTranslation(this.query.word, this.query.dicts);
-        
-        yield next;
+    router.get('/test', async (ctx, next) => {
+        ctx.body = 'test';
     });
 
-    router.post('/add-word', function* (next) {
-        this.checkBody('dict').notEmpty();
-        this.checkBody('word').notEmpty();
-        this.checkBody('translations').notEmpty();
-
-        if (this.errors) {
-            this.body = this.errors;
-            this.status = 400;
+    router.get('/translate', async (ctx, next) => {
+        ctx.checkQuery('word').notEmpty();
+        if (ctx.errors) {
+            ctx.body = ctx.errors;
+            ctx.status = 400;
             return;
         }
 
-        const { dict, word, translations } = this.request.body;
+        ctx.body = ctrl.findTranslation(ctx.query.word, ctx.query.dicts);
+    });
+
+    router.post('/add-word', async (ctx, next) => {
+        ctx.checkBody('dict').notEmpty();
+        ctx.checkBody('word').notEmpty();
+        ctx.checkBody('translations').notEmpty();
+
+        if (ctx.errors) {
+            ctx.body = ctx.errors;
+            ctx.status = 400;
+            return;
+        }
+
+        const { dict, word, translations } = ctx.request.body;
 
         const result = wordCtrl.addWord(dict, word, translations);
-        this.status = result.code;
-
-        yield next;
+        ctx.status = result.code;
     });
 
-    router.put('/change-word', function* (next) {
-        this.checkBody('dict').notEmpty();
-        this.checkBody('word').notEmpty();
-        this.checkBody('newWord').notEmpty();
-        this.checkBody('newTranslations').notEmpty();
+    router.put('/change-word', async (ctx, next) => {
+        ctx.checkBody('dict').notEmpty();
+        ctx.checkBody('word').notEmpty();
+        ctx.checkBody('newWord').notEmpty();
+        ctx.checkBody('newTranslations').notEmpty();
 
-        if (this.errors) {
-            this.body = this.errors;
-            this.status = 400;
+        if (ctx.errors) {
+            ctx.body = ctx.errors;
+            ctx.status = 400;
             return;
         }
 
-        const { dict, word, newWord, newTranslations } = this.request.body;
+        const { dict, word, newWord, newTranslations } = ctx.request.body;
 
         const result = wordCtrl.changeWord(dict, word, newWord, newTranslations);
-        this.status = result.code;
-
-        yield next;
+        ctx.status = result.code;
     })
 
-    router.put('/change-translation', function* (next) {
-        this.checkBody('dict').notEmpty();
-        this.checkBody('word').notEmpty();
-        this.checkBody('newTranslations').notEmpty();
+    router.put('/change-translation', async (ctx, next) => {
+        ctx.checkBody('dict').notEmpty();
+        ctx.checkBody('word').notEmpty();
+        ctx.checkBody('newTranslations').notEmpty();
 
-        if (this.errors) {
-            this.body = this.errors;
-            this.status = 400;
+        if (ctx.errors) {
+            ctx.body = ctx.errors;
+            ctx.status = 400;
             return;
         }
 
-        const { dict, word, newTranslations } = this.request.body;
+        const { dict, word, newTranslations } = ctx.request.body;
 
         const result = wordCtrl.changeTranslations(dict, word, newTranslations);
-        this.status = result.code;
-
-        yield next;
+        ctx.status = result.code;
     })
 
-    router.delete('/delete-word/:dict/:word', function* (next) {
-        const { dict, word } = this.params;
+    router.delete('/delete-word/:dict/:word', async (ctx, next) => {
+        const { dict, word } = ctx.params;
 
         const result = wordCtrl.deleteWord(dict, word);
-        this.status = result.code;
+        ctx.status = result.code;
 
         if (result.error) {
-            this.body = result;
-            this.status = result.code;
+            ctx.body = result;
+            ctx.status = result.code;
         }
-
-        yield next;
     })
 
-    router.get('/dictionary', function* (next) {
-        this.body = dictionary.allDictionaries();
-
-        yield next;
+    router.get('/dictionary', async (ctx, next) => {
+        ctx.body = dictionary.allDictionaries();
     });
 
-    router.get('/dict', function* (next) {
-        this.body = 'you';
+    router.get('/dict', async (ctx, next) => {
+        ctx.body = 'you';
 
         dictionary.read();
-
-        
     })
 
-    router.get('/dictionary/:name', function* (next) {
-        this.body = dictionary.getDictionary(this.params.name);
-
-        yield next;
+    router.get('/dictionary/:name', async (ctx, next) => {
+        ctx.body = dictionary.getDictionary(ctx.params.name);
     });
 
-    router.post('/dictionary/create', function* (next) {
-        //this.checkBody("name").notEmpty();
-        if (this.errors) {
-            this.body = this.errors;
-            this.status = 400;
+    router.post('/dictionary/create', async (ctx, next) => {
+        //ctx.checkBody("name").notEmpty();
+        if (ctx.errors) {
+            ctx.body = ctx.errors;
+            ctx.status = 400;
             return;
         }
 
-        dictionary.createDictionary(this.body.name, this.body.data);
-        this.body = 'OK';
-        this.status = 200;
-
-        yield next;
+        dictionary.createDictionary(ctx.body.name, ctx.body.data);
+        ctx.body = 'OK';
+        ctx.status = 200;
     });
 
-    router.post('/file', function* (next) {
-        console.log("Files: ", this.request.body.files);
-        console.log("Fields: ", this.request.body.fields);
+    router.post('/file', async (ctx, next) => {
+        console.log("Files: ", ctx.request.body.files);
+        console.log("Fields: ", ctx.request.body.fields);
 
-        this.body = "Received your data"
+        ctx.body = "Received your data"
     });
 }
 

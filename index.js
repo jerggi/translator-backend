@@ -1,6 +1,6 @@
-const fs = require('fs')
+require("babel-register");
 const koa = require('koa');
-const app = koa();
+const app = new koa();
 const router = require('./api/router');
 const createRoutes = require('./api/routes');
 
