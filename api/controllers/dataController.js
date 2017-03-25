@@ -1,63 +1,57 @@
+const fs = require('fs')
 const linebyline = require('linebyline')
-
-const data = {}
-const fileStoragePath = './data/data.json';
 const storagePath = './data';
 
-let word = null
+// in memory DB
+const data = {}
 
-const lineReader1 = linebyline('data/test1.dict')
-const dict1 = {}
+class DataController {
+    static loadData() {
+        const dict = {}
+        let word = null
 
-const lineReader2 = linebyline('data/test2.dict')
-const dict2 = {}
+        const filePromises = _.map(fs.readdirSync(storagePath), file => {
+            return new Promise((resolve, reject) => {
+                const readLiner = linebyline(`data/${file}`)
 
-lineReader1.on('line', function (line) {
-    if (word === null) {
-        word = line.split(' ')[0]
-    } else {
-        if (line[0] === ' ') {
-            const translations = line.split(';')
+                readLiner.on('line', (line) => {
+                    if (word === null) {
+                        word = line.split(' ')[0]
+                    } else {
+                        if (line[0] === ' ') {
+                            const translations = line.split(';')
 
-            for (let i = 0; i < translations.length; i++) {
-                translations[i] = translations[i].substr(1, translations[i].length - 1)
-            }
+                            for (let i = 0; i < translations.length; i++) {
+                                translations[i] = translations[i].substr(1, translations[i].length - 1)
+                            }
 
-            dict1[word] = translations;
-            word = null;
-        } else {
-            word = line.split(' ')[0]
-        }
+                            dict[word] = translations
+                            word = null
+                        } else {
+                            word = line.split(' ')[0]
+                        }
+                    }
+                }).on('close', () => {
+                    const key = file.substr(0, file.lastIndexOf('.'))
+                    data[key] = dict
+                    console.log(`dictionary ${file} loaded`)
+                    resolve(dict)
+                }).on('error', (err) => {
+                    reject(err)
+                })
+            })
+        })
+
+        return Promise.all(filePromises);
     }
-}).on('close', () => {
-    console.log('dictionary test1 loaded')
-    data['test1'] = dict1
-}).on('error', function(e) {
-    console.error(e)
-});
 
-lineReader2.on('line', function (line) {
-    if (word === null) {
-        word = line.split(' ')[0]
-    } else {
-        if (line[0] === ' ') {
-            const translations = line.split(';')
-
-            for (let i = 0; i < translations.length; i++) {
-                translations[i] = translations[i].substr(1, translations[i].length - 1)
-            }
-
-            dict2[word] = translations
-            word = null
-        } else {
-            word = line.split(' ')[0]
-        }
+    static getData() {
+        return data;
     }
-}).on('close', () => {
-    console.log('dictionary test2 loaded')
-    data['test2'] = dict2
-}).on('error', function(e) {
-    console.error(e)
-});
 
-module.exports = () => data;
+    get dictionaries() {
+        return Object.keys(data);
+    }
+}
+
+module.exports = DataController;

@@ -1,6 +1,8 @@
 require("babel-register");
 const koa = require('koa');
 const app = new koa();
+const dataController = require('./api/controllers/dataController');
+
 const router = require('./api/router');
 const createRoutes = require('./api/routes');
 
@@ -23,14 +25,21 @@ router.use(responseTime());
 
 app
   .use(koaBody({
-    formidable:{uploadDir: './data'},
+    formidable: {
+      uploadDir: './data'
+    },
     multipart: true,
     urlencoded: true
   }))
   .use(router.routes())
   .use(router.allowedMethods());
  
-app.listen(3000, () => console.log('server listening on port 3000'));
+dataController.loadData().then(() => {
+  app.listen(3000, () => console.log('server listening on port 3000'));
+}).catch((err) => {
+  console.error(err)
+});
+
 
 
 //data['somekey'] = 'great value'

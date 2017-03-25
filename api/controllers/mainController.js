@@ -1,4 +1,4 @@
-const data = require('./dataController')
+const dataController = require('./dataController')
 const levenshteinDist = require('../utils/levenshtein')
 const parse = require('../utils/wordParser')
 const C = require('../utils/constants')
@@ -10,7 +10,7 @@ process.on('exit', (code) => {
 
 module.exports = {
     findTranslation: (word, dictList) => {
-        let dicts = data()
+        let dicts = dataController.getData()
         let dictsForSearch
         let translations = []
         const words = parse(word)

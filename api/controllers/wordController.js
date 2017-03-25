@@ -1,9 +1,9 @@
-const data = require('./dataController')
+const dataController = require('./dataController')
 const codes = require('../utils/constants').HTTP_CODES
 
 module.exports = {
     addWord: (dict, word, translations) => {
-        const dicts = data()
+        const dicts = dataController.getData()
 
         if (!dicts[dict]) {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
