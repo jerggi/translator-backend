@@ -1,11 +1,12 @@
 const ctrl = require('./controllers/mainController');
 const dictionary = require('./controllers/dictionaryController');
 const wordCtrl = require('./controllers/wordController');
+const dataController = require('./controllers/dataController')
 
 const createRoutes = function (router) {
-    router.get('/test', async (ctx, next) => {
-        ctx.body = 'test';
-    });
+    router.get('/version', async (ctx, next) => {
+        ctx.body = dataController.getAppInfo()
+    })
 
     router.get('/translate', async (ctx, next) => {
         ctx.checkQuery('word').notEmpty();
@@ -18,7 +19,8 @@ const createRoutes = function (router) {
         ctx.body = ctrl.findTranslation(ctx.query.word, ctx.query.dicts);
     });
 
-    router.post('/add-word', async (ctx, next) => {
+    // ADD WORD
+    router.post('/dictionary/word', async (ctx, next) => {
         ctx.checkBody('dict').notEmpty();
         ctx.checkBody('word').notEmpty();
         ctx.checkBody('translations').notEmpty();
@@ -35,11 +37,10 @@ const createRoutes = function (router) {
         ctx.status = result.code;
     });
 
-    router.put('/change-word', async (ctx, next) => {
+    // CHANGE WORD
+    router.put('/dictionary/word', async (ctx, next) => {
         ctx.checkBody('dict').notEmpty();
         ctx.checkBody('word').notEmpty();
-        ctx.checkBody('newWord').notEmpty();
-        ctx.checkBody('newTranslations').notEmpty();
 
         if (ctx.errors) {
             ctx.body = ctx.errors;
@@ -47,43 +48,29 @@ const createRoutes = function (router) {
             return;
         }
 
-        const { dict, word, newWord, newTranslations } = ctx.request.body;
+        const { dict, word, newWord, translation, newTranslation } = ctx.request.body;
 
-        const result = wordCtrl.changeWord(dict, word, newWord, newTranslations);
+        const result = wordCtrl.changeWord(dict, word, newWord, translation, newTranslation);
         ctx.status = result.code;
     })
 
-    router.put('/change-translation', async (ctx, next) => {
+    // DELETE WORD
+    router.delete('/dictionary/word', async (ctx, next) => {
         ctx.checkBody('dict').notEmpty();
         ctx.checkBody('word').notEmpty();
-        ctx.checkBody('newTranslations').notEmpty();
 
-        if (ctx.errors) {
-            ctx.body = ctx.errors;
-            ctx.status = 400;
-            return;
-        }
+        const { dict, word, translation } = ctx.params;
 
-        const { dict, word, newTranslations } = ctx.request.body;
-
-        const result = wordCtrl.changeTranslations(dict, word, newTranslations);
-        ctx.status = result.code;
-    })
-
-    router.delete('/delete-word/:dict/:word', async (ctx, next) => {
-        const { dict, word } = ctx.params;
-
-        const result = wordCtrl.deleteWord(dict, word);
+        const result = wordCtrl.deleteWord(dict, word, translation);
         ctx.status = result.code;
 
         if (result.error) {
             ctx.body = result;
-            ctx.status = result.code;
         }
     })
 
     router.get('/dictionary', async (ctx, next) => {
-        ctx.body = dictionary.allDictionaries();
+        ctx.body = dictionary.allDictionaries(ctx.query.full);
     });
 
     router.get('/dict', async (ctx, next) => {
@@ -93,21 +80,27 @@ const createRoutes = function (router) {
     })
 
     router.get('/dictionary/:name', async (ctx, next) => {
-        ctx.body = dictionary.getDictionary(ctx.params.name);
+        ctx.body = dictionary.getDictionaryJSON(ctx.params.name);
     });
 
     router.post('/dictionary/create', async (ctx, next) => {
-        //ctx.checkBody("name").notEmpty();
+        ctx.checkBody("name").notEmpty();
         if (ctx.errors) {
-            ctx.body = ctx.errors;
-            ctx.status = 400;
-            return;
+            ctx.body = ctx.errors
+            ctx.status = 400
+            return
         }
 
-        dictionary.createDictionary(ctx.body.name, ctx.body.data);
-        ctx.body = 'OK';
-        ctx.status = 200;
-    });
+        const { name, data } = ctx.request.body
+        let result
+
+        try {
+            ctx.body = await dictionary.createDictionary(name, data)
+        } catch (err) {
+            ctx.body = err
+            ctx.status = err.code
+        }
+    })
 
     router.post('/file', async (ctx, next) => {
         console.log("Files: ", ctx.request.body.files);

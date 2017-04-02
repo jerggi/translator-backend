@@ -1,26 +1,48 @@
 const fs = require('fs')
+const dataController = require('./dataController')
+const codes = require('../utils/constants').HTTP_CODES
 
-const storagePath = './data'
+//TODO use 'path' module
+const storagePath = './data/dictionaries'
 
 module.exports = {
-    allDictionaries: () => {
-        const dictionaries = _.map(fs.readdirSync(storagePath), file => {
-            return file.substr(0, file.lastIndexOf('.'))
-        })
-
-        return dictionaries
+    allDictionaries: (full) => {
+        if (full) {
+            return dataController.getDictionaries()
+        } else {
+            return dataController.getDictList()
+        }
     },
     getDictionary: (name) => {
         const dictionary = fs.readFileSync(`${storagePath}/${name}.dict`)
 
         return dictionary
     },
-    createDictionary: (name, data) => {
-        if (fs.existsSync(`${storagePath}/${name}.json`)) {
-            console.log('yes')
+    getDictionaryJSON: (name) => {
+        const dicts = dataController.getData()
+
+        if (dicts[name] !== undefined) {
+            return dicts[name]
         } else {
-            console.log('no')
+            return { error: `Dictionary '${name}' not found.`, code: codes.BAD_REQUEST }
         }
+    },
+    createDictionary: (name, data) => {
+        const dictPath = `${storagePath}/${name}.dict`
+
+        return new Promise((resolve, reject) => {
+            if (fs.existsSync(dictPath)) {
+                reject({ error: `Dictionary '${name}' allready exists.`, code: codes.CONFLICT })
+            }
+
+            fs.writeFile(dictPath, data, (err) => {
+                if (err) {
+                    reject(err)
+                }
+
+                resolve('OK')
+            })
+        })
     },
     read: (file) => {
         fs.readFile(`${storagePath}/${file}`, (err, data) => {

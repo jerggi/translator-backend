@@ -1,18 +1,18 @@
 const fs = require('fs')
 const linebyline = require('linebyline')
-const storagePath = './data';
+const storagePath = 'data/dictionaries/'
 
 // in memory DB
 const data = {}
+const info = require('../../data/app/info.json')
 
 class DataController {
     static loadData() {
-        const dict = {}
-        let word = null
-
         const filePromises = _.map(fs.readdirSync(storagePath), file => {
             return new Promise((resolve, reject) => {
-                const readLiner = linebyline(`data/${file}`)
+                const readLiner = linebyline(`data/dictionaries/${file}`)
+                const dict = {}
+                let word = null
 
                 readLiner.on('line', (line) => {
                     if (word === null) {
@@ -42,16 +42,38 @@ class DataController {
             })
         })
 
-        return Promise.all(filePromises);
+        return Promise.all(filePromises)
+    }
+
+    static writeData(file, data) {
+        fs.writeFile(`./data/dictionaries/dict_write.dict`, data, (err) => {
+            if (err) {
+                return console.log(err)
+            }
+
+            console.log('the file was sved')
+        })
     }
 
     static getData() {
-        return data;
+        return data
     }
 
-    get dictionaries() {
-        return Object.keys(data);
+    static getAppInfo() {
+        return info;
+    }
+
+    static getDictionaries() {
+        return _.map(Object.keys(data), (dict) => {
+            return {
+                name: dict,
+            }
+        })
+    }
+
+    static getDictList() {
+        return Object.keys(data)
     }
 }
 
-module.exports = DataController;
+module.exports = DataController
