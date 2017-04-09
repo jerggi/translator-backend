@@ -15,10 +15,15 @@ const koaBody = require('koa-body')
 
 const responseTime = require('./api/middlewares/responseTime')
 
-process.on('exit', (code) => {
+process.on('SIGINT', async (code) => {
   console.log('Process going to exit, writing in memory data to file')
-  //dataController.writeData()
-});
+  try {
+    await dataController.writeData()
+    process.exit()
+  } catch (err) {
+    console.error(err)
+  }
+})
 
 createRoutes(router);
 router.use(responseTime());
@@ -26,7 +31,7 @@ router.use(responseTime());
 app
   .use(koaBody({
     formidable: {
-      uploadDir: './data'
+      uploadDir: './data/dictionaries'
     },
     multipart: true,
     urlencoded: true

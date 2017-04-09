@@ -46,12 +46,14 @@ class DataController {
     }
 
     static writeData(file, data) {
-        fs.writeFile(`./data/dictionaries/dict_write.dict`, data, (err) => {
-            if (err) {
-                return console.log(err)
-            }
+        return new Promise((resolve, reject) => {
+            fs.writeFile(`./data/dictionaries/dict_write.dict`, data, (err) => {
+                if (err) {
+                    reject(err)
+                }
 
-            console.log('the file was sved')
+                resolve('the file was sved')
+            })
         })
     }
 
