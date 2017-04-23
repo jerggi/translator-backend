@@ -33,7 +33,7 @@ class WordController {
         const wordToSet = newWord ? newWord : word
         let trToSet = newTranslation
 
-        if (foundDict.words[wordToSet]) {
+        if (wordToSet !== word && foundDict.words[wordToSet]) {
             trToSet = mergeTranslations(foundDict.words[wordToSet], newTranslation)
         }
 

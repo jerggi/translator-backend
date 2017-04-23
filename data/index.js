@@ -19,7 +19,7 @@ class Db {
 
             files.forEach(file => {
                 const fileName = file.split('.').slice(0, -1).join('.')
-                const filePath = path.join('data', 'dicts', fileName + '.json')
+                const filePath = path.join(storagePath, fileName + '.json')
 
                 dicts[fileName] = low(filePath)
             })
@@ -31,7 +31,7 @@ class Db {
 
             metaFiles.forEach(file => {
                 const fileName = file.split('.').slice(0, -1).join('.')
-                const filePath = path.join('data', '_meta', fileName + '.json')
+                const filePath = path.join(metaPath, fileName + '.json')
 
                 meta[fileName] = low(filePath)
             })

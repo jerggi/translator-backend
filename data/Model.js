@@ -1,6 +1,9 @@
 const low = require('lowdb')
-//let db = low('dictionaries.json')
-//let meta = low('meta.json')
+const path = require('path')
+const fs = require('fs')
+
+const storagePath = path.join('data', 'dicts')
+const metaPath = path.join('data', '_meta')
 
 class Model {
     constructor(dictionaries, meta) {
@@ -41,7 +44,21 @@ class Model {
     }
 
     createDictionary (name, data) {
+        const file = path.join(storagePath, `${name}.json`)
+        const meta = path.join(metaPath, `_${name}.json`)
+        this.data[name] = low(file)
+        this.data[name].setState({ name, words: {} })
+        this.meta[name] = low(meta)
+        this.meta[name].setState({})
+    }
 
+    deleteDictionary (name) {
+        const file = path.join(storagePath, `${name}.json`)
+        const meta = path.join(metaPath, `_${name}.json`)
+        delete this.data[name]
+        delete this.meta[name]
+        fs.unlinkSync(file)
+        fs.unlinkSync(meta)
     }
 
     addWord (dict, word, translation) {

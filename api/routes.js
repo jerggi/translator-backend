@@ -3,15 +3,9 @@ const dictionaryCtrl = require('./controllers/dictionaryController')
 const wordCtrl = require('./controllers/wordController')
 const dataController = require('./controllers/dataController')
 
-//const testCtrl = require('./controllers/testController')
-
 const createRoutes = function (router) {
     router.get('/version', async (ctx, next) => {
         ctx.body = dataController.getAppInfo()
-    })
-
-    router.get('/changes', async (ctx, next) => {
-        ctx.body = translate.findChanges()
     })
 
     router.get('/translate', async (ctx, next) => {
@@ -23,10 +17,9 @@ const createRoutes = function (router) {
         }
 
         ctx.body = translateCtrl.findTranslations(ctx.query.word, ctx.query.dict)
-        // ctx.body = await testCtrl.findTranslation(ctx.query.word, ctx.query.dicts);
-    });
+    })
 
-    // ADD WORD
+    // add word
     router.post('/dictionary/:name/word', async (ctx, next) => {
         ctx.checkBody('word').notEmpty()
         ctx.checkBody('translation').notEmpty()
@@ -46,9 +39,9 @@ const createRoutes = function (router) {
         if (result.error) {
             ctx.body = result
         }
-    });
+    })
 
-    // CHANGE WORD
+    // change word
     router.put('/dictionary/:name/word', async (ctx, next) => {
         ctx.checkBody('word').notEmpty()
         ctx.checkBody('newTranslation').notEmpty()
@@ -70,7 +63,7 @@ const createRoutes = function (router) {
         }
     })
 
-    // DELETE WORD
+    // delete word
     router.delete('/dictionary/:name/word/:word', async (ctx, next) => {
         if (ctx.errors) {
             ctx.body = ctx.errors
@@ -88,10 +81,12 @@ const createRoutes = function (router) {
         }
     })
 
+    // get list of dictionaries
     router.get('/dictionary', async (ctx, next) => {
         ctx.body = dictionaryCtrl.findAll()
-    });
+    })
 
+    // get dictionary
     router.get('/dictionary/:name', async (ctx, next) => {
         const result = dictionaryCtrl.findDictionary(ctx.params.name)
 
@@ -101,11 +96,11 @@ const createRoutes = function (router) {
         }
 
         ctx.body = result
-    });
+    })
 
+    // create new dictionary
     router.post('/dictionary', async (ctx, next) => {
-        ctx.checkBody("name").notEmpty();
-        ctx.checkBody("data").notEmpty();
+        ctx.checkBody("name").notEmpty()
 
         if (ctx.errors) {
             ctx.body = ctx.errors
@@ -115,27 +110,31 @@ const createRoutes = function (router) {
 
         const { name, data } = ctx.request.body
 
-        dictionaryCtrl.createDictionary(name, data)
-        /*try {
-            ctx.body = dictionary.createDictionary(name, data)
-        } catch (err) {
-            ctx.body = err
-            ctx.status = err.code
-        }*/
+        const result = dictionaryCtrl.createDictionary(name, data)
+
+        ctx.status = result.code
+        
+        if (result.error) {
+            ctx.body = result
+        }
+    })
+
+    router.delete('/dictionary/:name', async (ctx, next) => {
+        const result = dictionaryCtrl.deleteDictionary(ctx.params.name)
+
+        ctx.status = result.code
+        
+        if (result.error) {
+            ctx.body = result
+        }
     })
 
     router.post('/file', async (ctx, next) => {
-        console.log("Files: ", ctx.request.body.files);
-        console.log("Fields: ", ctx.request.body.fields);
+        console.log("Files: ", ctx.request.body.files)
+        console.log("Fields: ", ctx.request.body.fields)
 
         ctx.body = "Received your data"
-    });
-    // TODO remove router
-    router.get('/dictionary/create', async (ctx, next) => {
-        console.log('GET DICT CREATE REQUEST')
-
-        ctx.body = 'OK'
     })
 }
 
-module.exports = createRoutes;
+module.exports = createRoutes

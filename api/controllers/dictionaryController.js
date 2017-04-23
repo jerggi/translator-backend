@@ -9,8 +9,24 @@ const Db = require('../../data/index')
 const storagePath = './data/dictionaries'
 
 class DictionaryController {
-    createDictionary () {
-        const result = Db.data.createDictionary(name, data)
+    createDictionary (name, data) {
+        if (Db.data.hasDictionary(name)) {
+            return { error: `Dictionary '${name}' already exists.`, code: codes.CONFLICT }
+        }
+
+        Db.data.createDictionary(name, data)
+
+        return { code: codes.CREATED }
+    }
+
+    deleteDictionary (name) {
+        if (!Db.data.hasDictionary(name)) {
+            return { error: `Dictionary '${name}' not found.`, code: codes.BAD_REQUEST }
+        }
+
+        Db.data.deleteDictionary(name)
+
+        return { code: codes.NO_CONTENT }
     }
 
     findDictionary (dict) {
@@ -18,7 +34,7 @@ class DictionaryController {
     }
 
     findAll () {
-        return Db.data.findAll('neviemus')
+        return Db.data.getDictList()
     }
 }
 
