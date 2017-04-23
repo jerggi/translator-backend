@@ -1,80 +1,58 @@
 const dataController = require('./dataController')
 const codes = require('../utils/constants').HTTP_CODES
 
-module.exports = {
-    addWord: (dict, word, translations) => {
-        const dicts = dataController.getData()
+const mergeTranslations = require('../utils/merge')
+const Db = require('../../data/index')
 
-        if (dicts[dict] === undefined) {
+class WordController {
+    addWord (dict, word, translation) {
+        const foundDict = Db.data.findDictionary(dict)
+
+        if (foundDict === undefined) {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 
-        if (dicts[dict][word]) {
-            let newTranslations = _.filter(translations, (newTr) => {
-                return -1 === _.findIndex(dicts[dict][word], tr => tr === newTr)
-            })
-
-            dicts[dict][word] = _.concat(dicts[dict][word], newTranslations)
-        } else {
-            dicts[dict][word] = translations
+        let trToSet = translation
+        
+        if (foundDict.words[word]) {
+            trToSet = mergeTranslations(foundDict.words[word], translation)
         }
+        
+        Db.data.addWord(dict, word, trToSet)
 
         return { code: codes.CREATED }
-    },
-    changeWord: (dict, word, newWord, translation, newTranslation) => {
-        const dicts = dataController.getData()
+    }
 
-        if (dicts[dict] === undefined) {
+    changeWord (dict, word, newWord, newTranslation) {
+        const foundDict = Db.data.findDictionary(dict)
+
+        if (foundDict === undefined) {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 
-        if (dicts[dict][word] === undefined) {
-            return { code: codes.NO_CONTENT }
+        const wordToSet = newWord ? newWord : word
+        let trToSet = newTranslation
+
+        if (foundDict.words[wordToSet]) {
+            trToSet = mergeTranslations(foundDict.words[wordToSet], newTranslation)
         }
 
-        let translations = dicts[dict][word]
-
-        if (translation && newTranslation) {
-            const index = _.indexOf(translations, translation)
-
-            if (index !== -1) {
-                translations[index] = newTranslation
-            }
-        } else if (newTranslation) {
-            translations =  [newTranslation]
-        }
-
-        if (newWord) {
-            delete dicts[dict][word]
-            dicts[dict][newWord] = translations
-        } else {
-            dicts[dict][word] = translations
-        }
-
+        Db.data.changeWord(dict, word, wordToSet, trToSet)
 
         return { code: codes.NO_CONTENT }
-    },
-    deleteWord: (dict, word, translation) => {
-        const dicts = dataController.getData()
+    }
 
-        if (dicts[dict] === undefined) {
+    deleteWord (dict, word) {
+        const foundDict = Db.data.findDictionary(dict)
+
+        if (foundDict === undefined) {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 
-        if (translation) {
-            let translations = dicts[dict][word]
-
-            if (translations) {
-                translations = translations.filter((t) => {
-                    t !== translation
-                })
-            }
-
-            dicts[dict][word] = translations
-        } else {
-            delete dicts[dict][word]
-        }
+        Db.data.deleteWord(dict, word)
 
         return { code: codes.NO_CONTENT }
     }
 }
+
+module.exports = new WordController()

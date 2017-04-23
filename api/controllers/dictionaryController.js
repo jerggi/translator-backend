@@ -2,52 +2,24 @@ const fs = require('fs')
 const dataController = require('./dataController')
 const codes = require('../utils/constants').HTTP_CODES
 
+//const Db = require('../../data/Db')
+const Db = require('../../data/index')
+
 //TODO use 'path' module
 const storagePath = './data/dictionaries'
 
-module.exports = {
-    allDictionaries: (full) => {
-        if (full) {
-            return dataController.getDictionaries()
-        } else {
-            return dataController.getDictList()
-        }
-    },
-    getDictionary: (name) => {
-        const dictionary = fs.readFileSync(`${storagePath}/${name}.dict`)
+class DictionaryController {
+    createDictionary () {
+        const result = Db.data.createDictionary(name, data)
+    }
 
-        return dictionary
-    },
-    getDictionaryJSON: (name) => {
-        const dicts = dataController.getData()
+    findDictionary (dict) {
+        return Db.data.findDictionary(dict)
+    }
 
-        if (dicts[name] !== undefined) {
-            return dicts[name]
-        } else {
-            return { error: `Dictionary '${name}' not found.`, code: codes.BAD_REQUEST }
-        }
-    },
-    createDictionary: (name, data) => {
-        const dictPath = `${storagePath}/${name}.dict`
-
-        return new Promise((resolve, reject) => {
-            if (fs.existsSync(dictPath)) {
-                reject({ error: `Dictionary '${name}' allready exists.`, code: codes.CONFLICT })
-            }
-
-            fs.writeFile(dictPath, data, (err) => {
-                if (err) {
-                    reject(err)
-                }
-
-                resolve('OK')
-            })
-        })
-    },
-    read: (file) => {
-        fs.readFile(`${storagePath}/${file}`, (err, data) => {
-            if (err) throw err
-            console.log(data)
-        })
+    findAll () {
+        return Db.data.findAll('neviemus')
     }
 }
+
+module.exports = new DictionaryController()

@@ -1,0 +1,16 @@
+const mergeTranslations = (tr1, tr2) => {
+    const newTr = tr1.split(';').concat(tr2.split(';')).map(_.trim)
+    const hashMap = {}
+    
+    // remove duplicates
+    return newTr.filter(t => {
+        if (t.length === 0 || hashMap[t]) {
+            return false;
+        } else {
+            hashMap[t] = true
+            return true
+        }
+    }).join('; ')
+}
+
+module.exports = mergeTranslations;

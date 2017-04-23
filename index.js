@@ -9,24 +9,14 @@ const createRoutes = require('./api/routes')
 global._ = require('lodash')
 
 require('koa-validate')(app)
-
-const validator = require('koa-router-validator')
 const koaBody = require('koa-body')
-
 const responseTime = require('./api/middlewares/responseTime')
 
-process.on('SIGINT', async (code) => {
-  console.log('Process going to exit, writing in memory data to file')
-  try {
-    await dataController.writeData()
-    process.exit()
-  } catch (err) {
-    console.error(err)
-  }
-})
+const Db = require('./data/index')
+Db.load()
 
-createRoutes(router);
-router.use(responseTime());
+createRoutes(router)
+router.use(responseTime())
 
 app
   .use(koaBody({
@@ -39,10 +29,5 @@ app
   .use(router.routes())
   .use(router.allowedMethods())
 
-//dataController.writeData()
 
-dataController.loadData().then(() => {
-  app.listen(3000, () => console.log('server listening on port 3000'));
-}).catch((err) => {
-  console.error(err)
-});
+app.listen(3000, () => console.log('server listening on port 3000'))
