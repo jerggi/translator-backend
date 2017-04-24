@@ -88,7 +88,7 @@ const createRoutes = function (router) {
 
     // get dictionary
     router.get('/dictionary/:name', async (ctx, next) => {
-        const result = dictionaryCtrl.findDictionary(ctx.params.name)
+        const result = dictionaryCtrl.findDictionary(ctx.params.name, ctx.query.json)
 
         if (result.error) {
             ctx.status = result.code
@@ -119,6 +119,7 @@ const createRoutes = function (router) {
         }
     })
 
+    // delete dictionary
     router.delete('/dictionary/:name', async (ctx, next) => {
         const result = dictionaryCtrl.deleteDictionary(ctx.params.name)
 
@@ -129,6 +130,7 @@ const createRoutes = function (router) {
         }
     })
 
+    // sync dictionary from app and dictionary on server
     router.put('/sync/dictionary/:name', async (ctx, next) => {
         ctx.checkBody("revision").notEmpty()
         // ?? create new or send error dict not found ?

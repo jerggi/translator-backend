@@ -29,8 +29,14 @@ class DictionaryController {
         return { code: codes.NO_CONTENT }
     }
 
-    findDictionary (dict) {
-        return Db.data.findDictionary(dict)
+    findDictionary (dict, json = false) {
+        const foundDict = Db.data.findDictionary(dict)
+
+        if (foundDict) {
+            return json ? foundDict : this.parseToString(foundDict)
+        } else {
+             return { error: `Dictionary '${name}' not found.`, code: codes.BAD_REQUEST }
+        }
     }
 
     findAll () {
@@ -43,6 +49,19 @@ class DictionaryController {
         Db.data.syncDictionary(dict, revision, changes)
 
         return changesToSend
+    }
+
+    parseToString(dict) {
+        let dictStr = ''
+
+        _.forEach(dict.words, (value, key) => {
+            dictStr += `${key}\n ${value}\n`
+        })
+
+        return {
+            name: dict.name,
+            text: dictStr
+        }
     }
 }
 
