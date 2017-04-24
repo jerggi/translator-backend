@@ -1,9 +1,9 @@
 const responseTime = function () {
-    return function *(next) {
+    return async (ctx, next) => {
         const start = new Date;
-        yield next;
+        await next;
         const ms = new Date - start;
-        this.set('X-Response-Time', ms + 'ms');
+        ctx.set('X-Response-Time', ms + 'ms');
     }
 }
 

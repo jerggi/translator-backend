@@ -11,14 +11,18 @@ global._ = require('lodash')
 require('koa-validate')(app)
 const koaBody = require('koa-body')
 const responseTime = require('./api/middlewares/responseTime')
+const errorHandler = require('./api/middlewares/errorHandler')
 
 const Db = require('./data/index')
 Db.load()
 
 createRoutes(router)
-router.use(responseTime())
+//router.use(responseTime())
+//router.use(errorHandler())
 
 app
+  //.use(responseTime())
+  //.use(errorHandler())
   .use(koaBody({
     formidable: {
       uploadDir: './data/dictionaries'

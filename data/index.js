@@ -33,7 +33,7 @@ class Db {
                 const fileName = file.split('.').slice(0, -1).join('.')
                 const filePath = path.join(metaPath, fileName + '.json')
 
-                meta[fileName] = low(filePath)
+                meta[fileName.slice(1)] = low(filePath)
             })
             console.log('meta files loaded')
 

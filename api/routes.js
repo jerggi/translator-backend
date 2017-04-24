@@ -129,6 +129,19 @@ const createRoutes = function (router) {
         }
     })
 
+    router.put('/sync/dictionary/:name', async (ctx, next) => {
+        ctx.checkBody("revision").notEmpty()
+        // ?? create new or send error dict not found ?
+        const { name } = ctx.params.name
+        const { revision, changes } = ctx.request.body
+
+        // send changes from server
+        const result = dictionaryCtrl.syncDictionary(name, revision, changes)
+
+        ctx.status = result.code
+        ctx.body = result
+    })
+
     router.post('/file', async (ctx, next) => {
         console.log("Files: ", ctx.request.body.files)
         console.log("Fields: ", ctx.request.body.fields)

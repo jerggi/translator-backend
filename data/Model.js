@@ -2,6 +2,9 @@ const low = require('lowdb')
 const path = require('path')
 const fs = require('fs')
 
+const Change = require('./Change')
+const Type = require('./constants')
+
 const storagePath = path.join('data', 'dicts')
 const metaPath = path.join('data', '_meta')
 
@@ -49,7 +52,7 @@ class Model {
         this.data[name] = low(file)
         this.data[name].setState({ name, words: {} })
         this.meta[name] = low(meta)
-        this.meta[name].setState({})
+        this.meta[name].setState({ revisions: [{ revision: 0, changes: null }] })
     }
 
     deleteDictionary (name) {
@@ -61,7 +64,27 @@ class Model {
         fs.unlinkSync(meta)
     }
 
+    getRevision (dict) {
+        const currRevision =  this.meta[dict].get('revisions').last().value()
+
+        return currRevision.revision
+    }
+
+    getChanges (dict, revision) {
+        // TODO
+    }
+
+    syncDictionary (dict, revision, changes) {
+        // TODO
+    }
+
     addWord (dict, word, translation) {
+        const currRevision = this.getRevision(dict)
+        this.meta[dict]
+            .get('revisions')
+            .push({ revision: currRevision + 1, changes: new Change(Type.ADD_WORD, { word, translation }) })
+            .write()
+        
         this.data[dict]
             .get('words')
             .set(word, translation)
@@ -69,6 +92,12 @@ class Model {
     }
 
     changeWord (dict, word, newWord, newTranslation) {
+        const currRevision = this.getRevision(dict)
+        this.meta[dict]
+            .get('revisions')
+            .push({ revision: currRevision + 1, changes: new Change(Type.CHANGE_WORD, { word, newWord, translation }) })
+            .write()
+
         if (newWord && newWord !== word) {
             this.data[dict]
                 .get('words')
@@ -84,6 +113,12 @@ class Model {
     }
 
     deleteWord (dict, word) {
+        const currRevision = this.getRevision(dict)
+        this.meta[dict]
+            .get('revisions')
+            .push({ revision: currRevision + 1, changes: new Change(Type.DELETE_WORD, { word }) })
+            .write()
+
         this.data[dict]
             .get('words')
             .unset(word)

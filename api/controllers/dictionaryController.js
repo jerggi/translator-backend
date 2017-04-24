@@ -36,6 +36,14 @@ class DictionaryController {
     findAll () {
         return Db.data.getDictList()
     }
+
+    syncDictionary (dict, revision, changes) {
+        const changesToSend = Db.data.getChanges(dict, revision)
+
+        Db.data.syncDictionary(dict, revision, changes)
+
+        return changesToSend
+    }
 }
 
 module.exports = new DictionaryController()

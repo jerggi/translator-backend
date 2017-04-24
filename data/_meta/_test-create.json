@@ -1,0 +1,38 @@
+{
+  "revisions": [
+    {
+      "revision": 0,
+      "changes": null
+    },
+    {
+      "revision": 1,
+      "changes": {
+        "type": "ADD_WORD",
+        "data": {
+          "word": "ein",
+          "translation": "one"
+        }
+      }
+    },
+    {
+      "revision": 2,
+      "changes": {
+        "type": "ADD_WORD",
+        "data": {
+          "word": "zwei",
+          "translation": "two"
+        }
+      }
+    },
+    {
+      "revision": 3,
+      "changes": {
+        "type": "ADD_WORD",
+        "data": {
+          "word": "drei",
+          "translation": "three"
+        }
+      }
+    }
+  ]
+}
