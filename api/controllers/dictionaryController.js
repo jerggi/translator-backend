@@ -4,17 +4,20 @@ const codes = require('../utils/constants').HTTP_CODES
 
 //const Db = require('../../data/Db')
 const Db = require('../../data/index')
+const DataCtrl = require('./dataController')
 
 //TODO use 'path' module
 const storagePath = './data/dictionaries'
 
 class DictionaryController {
-    createDictionary (name, data) {
+    createDictionary (name, text) {
         if (Db.data.hasDictionary(name)) {
             return { error: `Dictionary '${name}' already exists.`, code: codes.CONFLICT }
         }
 
-        Db.data.createDictionary(name, data)
+        const dict = text ? DataCtrl.toJSON(text) : {}
+
+        Db.data.createDictionary(name, dict)
 
         return { code: codes.CREATED }
     }

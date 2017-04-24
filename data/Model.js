@@ -46,11 +46,11 @@ class Model {
         return this.data[dict] !== undefined
     }
 
-    createDictionary (name, data) {
+    createDictionary (name, dict) {
         const file = path.join(storagePath, `${name}.json`)
         const meta = path.join(metaPath, `_${name}.json`)
         this.data[name] = low(file)
-        this.data[name].setState({ name, words: {} })
+        this.data[name].setState({ name, words: dict })
         this.meta[name] = low(meta)
         this.meta[name].setState({ revisions: [{ revision: 0, changes: null }] })
     }

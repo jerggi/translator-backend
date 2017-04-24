@@ -108,9 +108,9 @@ const createRoutes = function (router) {
             return
         }
 
-        const { name, data } = ctx.request.body
+        const { name, text } = ctx.request.body
 
-        const result = dictionaryCtrl.createDictionary(name, data)
+        const result = dictionaryCtrl.createDictionary(name, text)
 
         ctx.status = result.code
         

@@ -74,7 +74,51 @@ function isPunct(ch)
 }
 
 class DataController {
-    static loadData() {
+    // TODO check special characters !
+    toJSON (text) {
+        const dict = {}
+        if (!text) return dict
+
+        let word = null
+        let translation = null
+        let newLine = true
+
+        for (let i = 0; i < text.length; i++) {
+            if (text[i] === '\n') {
+                newLine = true
+                if (translation) {
+                    dict[word] = translation.slice(1) // removing ' '
+                    translation = null
+                }
+            } else {
+                if (newLine) {
+                    if (text[i] === ' ') {
+                        translation = text[i] // adding ' '
+                    } else {
+                        word = text[i]
+                    }
+                } else {
+                    
+                    if (translation) {
+                        translation += text[i]
+                    } else {
+                        word += text[i]
+                    }
+    
+                }
+                newLine = false
+            }
+        }
+        
+        return dict
+    }
+
+    getAppInfo () {
+        return info
+    }
+
+    //deprecated
+    loadData () {
         const filePromises = _.map(fs.readdirSync(storagePath), file => {
             return new Promise((resolve, reject) => {
                 const readLiner = linebyline(`data/dictionaries/${file}`)
@@ -127,38 +171,6 @@ class DataController {
 
         return Promise.all(filePromises)
     }
-
-    static writeData(file, data) {
-        return new Promise((resolve, reject) => {
-            fs.writeFile(`./data/dictionaries/dict_write.dict`, data, (err) => {
-                if (err) {
-                    reject(err)
-                }
-
-                resolve('the file was sved')
-            })
-        })
-    }
-
-    static getData() {
-        return data
-    }
-
-    static getAppInfo() {
-        return info;
-    }
-
-    static getDictionaries() {
-        return _.map(Object.keys(data), (dict) => {
-            return {
-                name: dict,
-            }
-        })
-    }
-
-    static getDictList() {
-        return Object.keys(data)
-    }
 }
 
-module.exports = DataController
+module.exports = new DataController()
