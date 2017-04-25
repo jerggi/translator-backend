@@ -47,9 +47,13 @@ class DictionaryController {
     }
 
     syncDictionary (dict, revision, changes) {
+        if (!Db.data.hasDictionary(dict)) {
+            return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
+        }
+
         const changesToSend = Db.data.getChanges(dict, revision)
 
-        Db.data.syncDictionary(dict, revision, changes)
+        //Db.data.syncDictionary(dict, revision, changes)
 
         return changesToSend
     }

@@ -131,16 +131,19 @@ const createRoutes = function (router) {
     })
 
     // sync dictionary from app and dictionary on server
-    router.put('/sync/dictionary/:name', async (ctx, next) => {
+    router.post('/sync/dictionary/:name', async (ctx, next) => {
         ctx.checkBody("revision").notEmpty()
         // ?? create new or send error dict not found ?
-        const { name } = ctx.params.name
+        const { name } = ctx.params
         const { revision, changes } = ctx.request.body
 
         // send changes from server
         const result = dictionaryCtrl.syncDictionary(name, revision, changes)
 
-        ctx.status = result.code
+        if (result && result.error) {
+            ctx.status = result.code
+        }
+
         ctx.body = result
     })
 

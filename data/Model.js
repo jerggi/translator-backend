@@ -72,7 +72,7 @@ class Model {
 
     getChanges (dict, revision) {
         // TODO
-        return this.meta[dict].get('revisions').findLatestRevs().value()
+        return this.meta[dict].get('revisions').findLatestRevs(revision).value()
     }
 
     syncDictionary (dict, revision, changes) {
