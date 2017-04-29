@@ -30,6 +30,10 @@ class WordController {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 
+        if (foundDict.words[word] === undefined) {
+            return { error: `Word '${word}' not found in dictionary.`, code: codes.BAD_REQUEST }
+        }
+
         const wordToSet = newWord ? newWord : null
         let trToSet = newTranslation
 

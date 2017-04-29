@@ -16,9 +16,10 @@ const errorHandler = require('./api/middlewares/errorHandler')
 const Db = require('./data/index')
 Db.load()
 
-createRoutes(router)
 //router.use(responseTime())
 //router.use(errorHandler())
+
+createRoutes(router)
 
 app
   //.use(responseTime())

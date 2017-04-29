@@ -21,11 +21,11 @@ class TranslateController {
             // search in each dictionary from request
             _.forEach(dicts, (dict) => {
                 // for each word in dictionary
-                _.forEach(dict.words, (values, key) => {
+                _.forEach(dict.words, (translation, key) => {
                     let distance = levenshteinDist(word, key)
 
                     if (distance < C.LEVENSHTEIN_LIMIT) {
-                        translations.push({ word, key, values, distance, dict: dict.name })
+                        translations.push({ word, key, translation, distance, dict: dict.name })
                     }
                 })
             })

@@ -83,7 +83,7 @@ const createRoutes = function (router) {
 
     // get list of dictionaries
     router.get('/dictionary', async (ctx, next) => {
-        ctx.body = dictionaryCtrl.findAll()
+        ctx.body = dictionaryCtrl.findAll(ctx.query.full)
     })
 
     // get dictionary
@@ -116,6 +116,8 @@ const createRoutes = function (router) {
         
         if (result.error) {
             ctx.body = result
+        } else {
+            ctx.body = result.body
         }
     })
 

@@ -1,8 +1,92 @@
 {
   "revisions": [
     {
-      "revision": 0,
+      "revision": 1,
       "changes": null
+    },
+    {
+      "revision": 2,
+      "changes": {
+        "type": "ADD_WORD",
+        "word": "42",
+        "translation": [
+          "meaning of life"
+        ]
+      }
+    },
+    {
+      "revision": 3,
+      "changes": {
+        "type": "ADD_WORD",
+        "word": "42",
+        "translation": "answer to everything; meaning of life"
+      }
+    },
+    {
+      "revision": 4,
+      "changes": {
+        "type": "ADD_WORD",
+        "word": "42",
+        "translation": "answer to everything; meaning of life; gods particle"
+      }
+    },
+    {
+      "revision": 5,
+      "changes": {
+        "type": "CHANGE_WORD",
+        "word": "42",
+        "newWord": "47",
+        "newTranslation": "answer to everything; meaning of life; gods particle"
+      }
+    },
+    {
+      "revision": 6,
+      "changes": {
+        "type": "CHANGE_WORD",
+        "word": "42",
+        "newWord": null,
+        "newTranslation": "answer to everything; meaning of life; gods particle"
+      }
+    },
+    {
+      "revision": 7,
+      "changes": {
+        "type": "DELETE_WORD",
+        "word": "47"
+      }
+    },
+    {
+      "revision": 8,
+      "changes": {
+        "type": "CHANGE_WORD",
+        "word": "edited",
+        "newWord": "testadd",
+        "newTranslation": "testadd; translation2; test; edit; edit5"
+      }
+    },
+    {
+      "revision": 9,
+      "changes": {
+        "type": "DELETE_WORD",
+        "word": "testadd"
+      }
+    },
+    {
+      "revision": 10,
+      "changes": {
+        "type": "ADD_WORD",
+        "word": "test-add",
+        "translation": "translacia1; translacia2"
+      }
+    },
+    {
+      "revision": 11,
+      "changes": {
+        "type": "CHANGE_WORD",
+        "word": "david",
+        "newWord": "davidko",
+        "newTranslation": "kaprad; vypoved"
+      }
     }
   ]
 }

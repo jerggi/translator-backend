@@ -18,6 +18,13 @@ class Model {
         return _.keys(this.data)
     }
 
+    getDictListFull () {
+        return _.map(this.data, dict => ({
+                name: dict.get('name').value()
+            })
+        )
+    }
+
     test (dict) {
         return this.data[dict].get('words').value()
     }
@@ -52,7 +59,7 @@ class Model {
         this.data[name] = low(file)
         this.data[name].setState({ name, words: dict })
         this.meta[name] = low(meta)
-        this.meta[name].setState({ revisions: [{ revision: 0, changes: null }] })
+        this.meta[name].setState({ revisions: [{ revision: 1, changes: null }] })
     }
 
     deleteDictionary (name) {
@@ -83,7 +90,7 @@ class Model {
         const currRevision = this.getRevision(dict)
         this.meta[dict]
             .get('revisions')
-            .push({ revision: currRevision + 1, changes: new Change(Type.ADD_WORD, { word, translation }) })
+            .push({ revision: currRevision + 1, changes: { type: Type.ADD_WORD, word, translation } })
             .write()
         
         this.data[dict]
@@ -96,7 +103,7 @@ class Model {
         const currRevision = this.getRevision(dict)
         this.meta[dict]
             .get('revisions')
-            .push({ revision: currRevision + 1, changes: new Change(Type.CHANGE_WORD, { word, newWord, translation }) })
+            .push({ revision: currRevision + 1, changes: { type: Type.CHANGE_WORD, word, newWord, newTranslation } })
             .write()
 
         if (newWord && newWord !== word) {
@@ -117,7 +124,7 @@ class Model {
         const currRevision = this.getRevision(dict)
         this.meta[dict]
             .get('revisions')
-            .push({ revision: currRevision + 1, changes: new Change(Type.DELETE_WORD, { word }) })
+            .push({ revision: currRevision + 1, changes: { type: Type.DELETE_WORD, word } })
             .write()
 
         this.data[dict]

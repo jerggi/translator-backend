@@ -19,7 +19,7 @@ class DictionaryController {
 
         Db.data.createDictionary(name, dict)
 
-        return { code: codes.CREATED }
+        return { code: codes.CREATED, body: { revision: 1 } }
     }
 
     deleteDictionary (name) {
@@ -42,8 +42,12 @@ class DictionaryController {
         }
     }
 
-    findAll () {
-        return Db.data.getDictList()
+    findAll (full) {
+        if (full) {
+            return Db.data.getDictListFull()
+        } else {
+            return Db.data.getDictList()
+        }
     }
 
     syncDictionary (dict, revision, changes) {
