@@ -1,9 +1,5 @@
-const fs = require('fs')
-const linebyline = require('linebyline')
-const storagePath = 'data/dictionaries/'
 
-// in memory DB
-const data = {}
+// in memory
 const info = require('../../data/app/info.json')
 
 //TODO

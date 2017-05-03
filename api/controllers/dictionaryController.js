@@ -1,13 +1,7 @@
-const fs = require('fs')
-const dataController = require('./dataController')
 const codes = require('../utils/constants').HTTP_CODES
 
-//const Db = require('../../data/Db')
 const Db = require('../../data/index')
 const DataCtrl = require('./dataController')
-
-//TODO use 'path' module
-const storagePath = './data/dictionaries'
 
 class DictionaryController {
     createDictionary (name, text) {
@@ -59,6 +53,10 @@ class DictionaryController {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 
+        if (revision === 0) {
+            return { error: `Different dictionary with name '${dict}' already exists. Cannot synchronize.`, code: codes.CONFLICT }
+        }
+
         const changesToSend = Db.data.getChanges(dict, revision)
 
         if (Array.isArray(changes) && changes.length > 0) {
@@ -71,6 +69,14 @@ class DictionaryController {
         }
 
         const newRevision = Db.data.getRevision(dict)
+        
+        if (changesToSend === null) { // revision too old, sending whole dictionary
+            const dictToSend = Db.data.findDictionary(dict)
+            return {
+                revision: newRevision,
+                text: this.parseToString(dictToSend.words)
+            }
+        }
 
         return { changes: changesToSend, revision: newRevision }
     }
@@ -83,7 +89,6 @@ class DictionaryController {
         })
 
         return str.length === 0 ? str : str.slice(0, -1)
-        // return str
     }
 }
 

@@ -73,8 +73,17 @@ class Model {
         return currRevision.revision
     }
 
+    getOldestRevision (dict) {
+        const oldestRevision = this.meta[dict].get('revisions').first().value()
+
+        return oldestRevision.revision
+    }
+
     getChanges (dict, revision) {
-        // TODO
+        if (this.getOldestRevision(dict) > revision) {
+            return null
+        }
+
         return this.meta[dict].get('revisions').findLatestChanges(revision).value()
     }
 
