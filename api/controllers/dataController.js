@@ -87,31 +87,29 @@ class DataController {
             if (text[i] === '\n') {
                 newLine = true
                 if (translation) {
-                    dict[word] = translation.slice(1) // removing ' '
+                    dict[word] = translation.slice(1) // with removing ' '
                     translation = null
                 }
             } else {
                 if (newLine) {
-                    if (text[i] === ' ') {
-                        translation = text[i] // adding ' '
+                    if (text[i] === ' ') { // creating translation
+                        translation = text[i] // ' ' added to translation
                     } else {
                         word = text[i]
                     }
                 } else {
-                    
                     if (translation) {
                         translation += text[i]
                     } else {
                         word += text[i]
                     }
-    
                 }
                 newLine = false
             }
         }
 
         if (!dict[word] && translation) {
-            dict[word] = translation
+            dict[word] = translation.slice(1) // with removing ' '
         }
 
         return dict

@@ -2,8 +2,8 @@ const low = require('lowdb')
 const path = require('path')
 const fs = require('fs')
 
-const Change = require('./Change')
 const Type = require('./constants')
+const mixins = require('./mixins')
 
 const storagePath = path.join('data', 'dicts')
 const metaPath = path.join('data', '_meta')
@@ -34,10 +34,6 @@ class Model {
         return this.data[dict].get('neviemus')
     }
 
-    findChanges (dict) {
-        return this.meta[dict].get('neviemus')
-    }
-
     findDictionary (dict) {
         return this.data[dict] ? this.data[dict].getState() : null
     }
@@ -58,7 +54,7 @@ class Model {
         const meta = path.join(metaPath, `_${name}.json`)
         this.data[name] = low(file)
         this.data[name].setState({ name, words: dict })
-        this.meta[name] = low(meta)
+        this.meta[name] = mixins(low(meta))
         this.meta[name].setState({ revisions: [{ revision: 1, changes: null }] })
     }
 
@@ -79,11 +75,19 @@ class Model {
 
     getChanges (dict, revision) {
         // TODO
-        return this.meta[dict].get('revisions').findLatestRevs(revision).value()
+        return this.meta[dict].get('revisions').findLatestChanges(revision).value()
     }
 
-    syncDictionary (dict, revision, changes) {
-        // TODO
+    addChanges (dict, revision, changes) {
+        _.forEach(changes, c => {
+            if (c.type === Type.ADD_WORD && c.word && c.translation) {
+                this.addWord(dict, c.word, c.translation)
+            } else if (c.type === Type.CHANGE_WORD && c.word && c.newTranslation) {
+                this.changeWord(dict, c.word, c.newWord, c.newTranslation)
+            } else if (c.type === Type.DELETE_WORD && c.word) {
+                this.deleteWord(dict, c.word)
+            }
+        })
     }
 
     addWord (dict, word, translation) {

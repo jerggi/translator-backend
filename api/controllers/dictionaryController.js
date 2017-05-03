@@ -36,7 +36,11 @@ class DictionaryController {
         const foundDict = Db.data.findDictionary(dict)
 
         if (foundDict) {
-            return json ? foundDict : this.parseToString(foundDict)
+            return json ? foundDict : {
+                name: foundDict.name,
+                revision: Db.data.getRevision(foundDict.name),
+                text: this.parseToString(foundDict.words)
+            }
         } else {
              return { error: `Dictionary '${name}' not found.`, code: codes.BAD_REQUEST }
         }
@@ -57,22 +61,29 @@ class DictionaryController {
 
         const changesToSend = Db.data.getChanges(dict, revision)
 
-        //Db.data.syncDictionary(dict, revision, changes)
+        if (Array.isArray(changes) && changes.length > 0) {
+            Db.data.addChanges(dict, revision, changes)
+        }
 
-        return changesToSend
+        // TEMP - array as string JSON
+        if (!Array.isArray(changes)) {
+            Db.data.addChanges(dict, revision, JSON.parse(changes))
+        }
+
+        const newRevision = Db.data.getRevision(dict)
+
+        return { changes: changesToSend, revision: newRevision }
     }
 
-    parseToString(dict) {
-        let dictStr = ''
+    parseToString(words) {
+        let str = ''
 
-        _.forEach(dict.words, (value, key) => {
-            dictStr += `${key}\n ${value}\n`
+        _.forEach(words, (value, key) => {
+            str += `${key}\n ${value}\n`
         })
 
-        return {
-            name: dict.name,
-            text: dictStr
-        }
+        return str.length === 0 ? str : str.slice(0, -1)
+        // return str
     }
 }
 

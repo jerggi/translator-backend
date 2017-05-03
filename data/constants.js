@@ -1,5 +1,5 @@
 module.exports = {
-    'ADD_WORD': 'ADD_WORD',
-    'CHANGE_WORD': 'CHANGE_WORD',
-    'DELETE_WORD': 'DELETE_WORD'
+    'ADD_WORD': 'add',
+    'CHANGE_WORD': 'change',
+    'DELETE_WORD': 'delete'
 }

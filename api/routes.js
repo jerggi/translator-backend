@@ -139,6 +139,8 @@ const createRoutes = function (router) {
         const { name } = ctx.params
         const { revision, changes } = ctx.request.body
 
+        console.log('SYNC request body: ', ctx.request.body)
+
         // send changes from server
         const result = dictionaryCtrl.syncDictionary(name, revision, changes)
 
