@@ -1,4 +1,5 @@
 const codes = require('../utils/constants').HTTP_CODES
+const Type = require('../../data/constants.js')
 
 const Db = require('../../data/index')
 const DataCtrl = require('./dataController')
@@ -40,12 +41,8 @@ class DictionaryController {
         }
     }
 
-    findAll (full) {
-        if (full) {
-            return Db.data.getDictListFull()
-        } else {
-            return Db.data.getDictList()
-        }
+    findAll () {
+        return Db.data.getDictList()
     }
 
     syncDictionary (dict, revision, changes) {
@@ -54,18 +51,23 @@ class DictionaryController {
         }
 
         if (revision === 0) {
-            return { error: `Different dictionary with name '${dict}' already exists. Cannot synchronize.`, code: codes.CONFLICT }
+            console.log('CANNOT SYNCHRONIZE')
+            return { error: `Different dictionary with name '${dict}' already exists. Cannot synchronize. To synchronize rename your dictionary.`, code: codes.CONFLICT }
         }
+
+        console.log('RECIEVING CHANGES: ', changes)
 
         const changesToSend = Db.data.getChanges(dict, revision)
 
-        if (Array.isArray(changes) && changes.length > 0) {
-            Db.data.addChanges(dict, revision, changes)
-        }
+        console.log('SENDING CHANGES: ', changesToSend)
 
-        // TEMP - array as string JSON
-        if (!Array.isArray(changes)) {
-            Db.data.addChanges(dict, revision, JSON.parse(changes))
+        if (Array.isArray(changes) && changes.length > 0) {
+            const filteredChanges = this.filterConflicts(changes, changesToSend)
+            
+            if (filteredChanges.length > 0) {
+                //console.log('APPLYING CHANGES: ', filteredChanges)
+                Db.data.addChanges(dict, revision, filteredChanges)
+            }
         }
 
         const newRevision = Db.data.getRevision(dict)
@@ -79,6 +81,18 @@ class DictionaryController {
         }
 
         return { changes: changesToSend, revision: newRevision }
+    }
+
+    filterConflicts (recievedChanges, changesToSend) {
+        return _.filter(recievedChanges, (recieved) => {
+            const conflict = _.findLast(changesToSend, (toSend) => {
+                return recieved.word === toSend.word
+            })
+
+            if (conflict) console.log('conflict: ', conflict)
+
+            return conflict === undefined
+        })
     }
 
     parseToString(words) {

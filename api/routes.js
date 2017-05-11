@@ -83,7 +83,7 @@ const createRoutes = function (router) {
 
     // get list of dictionaries
     router.get('/dictionary', async (ctx, next) => {
-        ctx.body = dictionaryCtrl.findAll(ctx.query.full)
+        ctx.body = dictionaryCtrl.findAll()
     })
 
     // get dictionary
@@ -138,8 +138,6 @@ const createRoutes = function (router) {
 
         const { name } = ctx.params
         const { revision, changes } = ctx.request.body
-
-        console.log('SYNC request body: ', ctx.request.body)
 
         // send changes from server
         const result = dictionaryCtrl.syncDictionary(name, revision, changes)
