@@ -1,0 +1,54 @@
+{
+  "revisions": [
+    {
+      "revision": 1,
+      "changes": null
+    },
+    {
+      "revision": 2,
+      "changes": {
+        "type": "add",
+        "word": "42",
+        "translation": "answer to everything"
+      }
+    },
+    {
+      "revision": 3,
+      "changes": {
+        "type": "add",
+        "word": "daco",
+        "translation": "nieco"
+      }
+    },
+    {
+      "revision": 4,
+      "changes": {
+        "type": "delete",
+        "word": "42"
+      }
+    },
+    {
+      "revision": 4,
+      "changes": {
+        "type": "add",
+        "word": "42",
+        "translation": "something"
+      }
+    },
+    {
+      "revision": 5,
+      "changes": {
+        "type": "delete",
+        "word": "daco"
+      }
+    },
+    {
+      "revision": 5,
+      "changes": {
+        "type": "add",
+        "word": "nieco",
+        "translation": "something else"
+      }
+    }
+  ]
+}

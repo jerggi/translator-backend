@@ -8,7 +8,7 @@ class WordController {
     addWord (dict, word, translation) {
         const foundDict = Db.data.findDictionary(dict)
 
-        if (foundDict === undefined) {
+        if (!foundDict) {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 
@@ -25,12 +25,14 @@ class WordController {
 
     changeWord (dict, word, newWord, newTranslation) {
         const foundDict = Db.data.findDictionary(dict)
+        console.log(dict)
+        console.log(foundDict)
 
-        if (foundDict === undefined) {
+        if (!foundDict) {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 
-        if (foundDict.words[word] === undefined) {
+        if (!foundDict.words[word]) {
             return { error: `Word '${word}' not found in dictionary.`, code: codes.BAD_REQUEST }
         }
 
@@ -49,7 +51,7 @@ class WordController {
     deleteWord (dict, word) {
         const foundDict = Db.data.findDictionary(dict)
 
-        if (foundDict === undefined) {
+        if (!foundDict) {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 

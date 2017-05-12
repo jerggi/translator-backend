@@ -90,11 +90,9 @@ class Model {
 
     addChanges (dict, revision, changes) {
         _.forEach(changes, c => {
-            if (c.type === Type.ADD_WORD && c.word && c.translation) {
+            if (c.type === Type.ADD && c.word && c.translation) {
                 this.addWord(dict, c.word, c.translation)
-            } else if (c.type === Type.CHANGE_WORD && c.word && c.translation) {
-                this.changeWord(dict, c.word, c.newWord, c.translation)
-            } else if (c.type === Type.DELETE_WORD && c.word) {
+            } else if (c.type === Type.DELETE && c.word) {
                 this.deleteWord(dict, c.word)
             }
         })
@@ -104,7 +102,7 @@ class Model {
         const currRevision = this.getRevision(dict)
         this.meta[dict]
             .get('revisions')
-            .push({ revision: currRevision + 1, changes: { type: Type.ADD_WORD, word, translation } })
+            .push({ revision: currRevision + 1, changes: { type: Type.ADD, word, translation } })
             .write()
         
         this.data[dict]
@@ -117,7 +115,8 @@ class Model {
         const currRevision = this.getRevision(dict)
         this.meta[dict]
             .get('revisions')
-            .push({ revision: currRevision + 1, changes: { type: Type.CHANGE_WORD, word, newWord: newWord ? newWord : '' , translation: newTranslation } })
+            .push({ revision: currRevision + 1, changes: { type: Type.DELETE, word } })
+            .push({ revision: currRevision + 1, changes: { type: Type.ADD, word: newWord ? newWord : word, translation: newTranslation } })
             .write()
 
         if (newWord && newWord !== word) {
@@ -138,7 +137,7 @@ class Model {
         const currRevision = this.getRevision(dict)
         this.meta[dict]
             .get('revisions')
-            .push({ revision: currRevision + 1, changes: { type: Type.DELETE_WORD, word } })
+            .push({ revision: currRevision + 1, changes: { type: Type.DELETE, word } })
             .write()
 
         this.data[dict]
