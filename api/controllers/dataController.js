@@ -70,9 +70,11 @@ function isPunct(ch) {
 class DataController {
     // TODO check special characters !
     toJSON (text) {
-        const dict = {}
+        const words = {}
+        let wordCount = 0
+    
         if (!text) {
-            return dict
+            return { words, wordCount }
         }
 
         let word = null
@@ -83,7 +85,11 @@ class DataController {
             if (text[i] === '\n') {
                 newLine = true
                 if (translation) {
-                    dict[word] = translation.slice(1) // with removing ' '
+                    if (this.isWordValid(word)) {
+                        words[word] = translation.slice(1) // with removing ' '
+                        wordCount++
+                    }
+
                     translation = null
                 }
             } else {
@@ -104,11 +110,16 @@ class DataController {
             }
         }
 
-        if (!dict[word] && translation) {
-            dict[word] = translation.slice(1) // with removing ' '
+        if (!words[word] && translation) {
+            words[word] = translation.slice(1) // with removing ' '
+            wordCount++
         }
 
-        return dict
+        return { words, wordCount }
+    }
+
+    isWordValid (word) {
+        return /^[^.\[\]]*$/.test(word)
     }
 
     getAppInfo () {

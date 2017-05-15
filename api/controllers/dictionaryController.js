@@ -3,6 +3,7 @@ const Type = require('../../data/constants.js')
 
 const Db = require('../../data/index')
 const DataCtrl = require('./dataController')
+const WordCtrl = require('./wordController')
 
 class DictionaryController {
     createDictionary (name, text) {
@@ -10,9 +11,13 @@ class DictionaryController {
             return { error: `Dictionary '${name}' already exists.`, code: codes.CONFLICT }
         }
 
-        const dict = text ? DataCtrl.toJSON(text) : {}
+        if (!this.isNameValid(name)) {
+            return { error: 'Dictionary name cannot contain following characters: < > : " / \\ | ? *', code: codes.BAD_REQUEST }
+        }
 
-        Db.data.createDictionary(name, dict)
+        const dict = text ? DataCtrl.toJSON(text) : { words: {}, wordCount: 0 }
+
+        Db.data.createDictionary(name, dict.words, dict.wordCount)
 
         return { code: codes.CREATED, body: { revision: 1 } }
     }
@@ -55,18 +60,19 @@ class DictionaryController {
             return { error: `Different dictionary with name '${dict}' already exists. Cannot synchronize. To synchronize rename your dictionary.`, code: codes.CONFLICT }
         }
 
-        console.log('RECIEVING CHANGES: ', changes)
 
-        const changesToSend = Db.data.getChanges(dict, revision)
+        let changesToSend = Db.data.getChanges(dict, revision)
+        let recievedChanges = changes
+        console.log('RECIEVED CHANGES', recievedChanges)
 
-        console.log('SENDING CHANGES: ', changesToSend)
+        if (Array.isArray(recievedChanges) && recievedChanges.length > 0) {
+            // recievedChanges = this.filterConflicts(recievedChanges, changesToSend)
+            recievedChanges = this.reduceChanges(recievedChanges)
 
-        if (Array.isArray(changes) && changes.length > 0) {
-            const filteredChanges = this.filterConflicts(changes, changesToSend)
+            console.log('ADDING CHANGES', recievedChanges)
             
-            if (filteredChanges.length > 0) {
-                //console.log('APPLYING CHANGES: ', filteredChanges)
-                Db.data.addChanges(dict, revision, filteredChanges)
+            if (recievedChanges.length > 0) {
+                this.addChanges(dict, revision, recievedChanges)
             }
         }
 
@@ -80,18 +86,49 @@ class DictionaryController {
             }
         }
 
+        console.log('CHANGES TO SEND', changesToSend)
         return { changes: changesToSend, revision: newRevision }
+    }
+
+    addChanges (dict, revision, changes) {
+        _.forEach(changes, c => {
+            if (c.type === Type.ADD && c.word && c.translation) {
+                WordCtrl.addWord(dict, c.word, c.translation)
+            } else if (c.type === Type.DELETE && c.word) {
+                WordCtrl.deleteWord(dict, c.word)
+            }
+        })
+    }
+
+    reduceChanges (changes) {
+        const recentWordChange = {}
+        const reducedChanges = []
+        for (let i = changes.length - 1; i >= 0; i--) {
+            const word = changes[i].word
+            const type = changes[i].type
+
+            if (recentWordChange[word]) {
+                if (recentWordChange[word].type !== Type.DELETE) {
+                    recentWordChange[word] = changes[i]
+                    reducedChanges.unshift(changes[i])
+                }
+
+            } else {
+                recentWordChange[word] = changes[i]
+                reducedChanges.unshift(changes[i])
+            }
+        }
+
+        return reducedChanges
     }
 
     filterConflicts (recievedChanges, changesToSend) {
         return _.filter(recievedChanges, (recieved) => {
-            const conflict = _.findLast(changesToSend, (toSend) => {
+            const lastChangeToWord = _.findLast(changesToSend, (toSend) => {
                 return recieved.word === toSend.word
             })
 
-            if (conflict) console.log('conflict: ', conflict)
-
-            return conflict === undefined
+            return lastChangeToWord === undefined
         })
     }
 
@@ -103,6 +140,18 @@ class DictionaryController {
         })
 
         return str.length === 0 ? str : str.slice(0, -1)
+    }
+
+    isNameValid(name) {
+        return /^[^<>:"/\|?*]*$/.test(name)
+    }
+
+    changeEquals (ch1, ch2) {
+        if (ch1.type === ch2.type) {
+            return ch1.word === ch2.word && (ch1.translation ? ch1.translation === ch2.translation : true)
+        }
+
+        return false
     }
 }
 

@@ -50,11 +50,12 @@ class Model {
         return this.data[dict] !== undefined
     }
 
-    createDictionary (name, dict) {
+    createDictionary (name, words, wordCount) {
         const file = path.join(storagePath, `${name}.json`)
         const meta = path.join(metaPath, `_${name}.json`)
+        const date = Date.now()
         this.data[name] = low(file)
-        this.data[name].setState({ name, words: dict })
+        this.data[name].setState({ name, words, createdAt: date, lastEditedAt: date, wordCount })
         this.meta[name] = mixins(low(meta))
         this.meta[name].setState({ revisions: [{ revision: 1, changes: null }] })
     }
@@ -88,17 +89,17 @@ class Model {
         return this.meta[dict].get('revisions').findLatestChanges(revision).value()
     }
 
-    addChanges (dict, revision, changes) {
-        _.forEach(changes, c => {
-            if (c.type === Type.ADD && c.word && c.translation) {
-                this.addWord(dict, c.word, c.translation)
-            } else if (c.type === Type.DELETE && c.word) {
-                this.deleteWord(dict, c.word)
-            }
-        })
+    getWordCount (dict) {
+        return this.data[dict].get('wordCount').value()
     }
 
-    addWord (dict, word, translation) {
+    setParams (dict, params) {
+        this.data[dict]
+            .set('wordCount', params.wordCount)
+            .set('lastEditedAt', Date.now())
+    }
+
+    addWord (dict, word, translation, mergedTranslation) {
         const currRevision = this.getRevision(dict)
         this.meta[dict]
             .get('revisions')
@@ -107,28 +108,28 @@ class Model {
         
         this.data[dict]
             .get('words')
-            .set(word, translation)
+            .set(word, mergedTranslation ? mergedTranslation : translation)
             .write()
     }
 
-    changeWord (dict, word, newWord, newTranslation) {
+    changeWord (dict, word, newWord, newTranslation, mergedTranslation) {
         const currRevision = this.getRevision(dict)
         this.meta[dict]
             .get('revisions')
             .push({ revision: currRevision + 1, changes: { type: Type.DELETE, word } })
-            .push({ revision: currRevision + 1, changes: { type: Type.ADD, word: newWord ? newWord : word, translation: newTranslation } })
+            .push({ revision: currRevision + 2, changes: { type: Type.ADD, word: newWord ? newWord : word, translation: newTranslation } })
             .write()
 
         if (newWord && newWord !== word) {
             this.data[dict]
                 .get('words')
-                .set(newWord, newTranslation)
+                .set(newWord, mergedTranslation ? mergedTranslation : newTranslation)
                 .unset(word)
                 .write()
         } else {
             this.data[dict]
                 .get('words')
-                .set(word, newTranslation)
+                .set(word, mergedTranslation ? mergedTranslation : newTranslation)
                 .write()
         }
     }
