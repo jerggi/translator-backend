@@ -135,12 +135,15 @@ class DictionaryController {
             const wordsSendingChanges = sendingWords[recievedWord]
             if (wordsSendingChanges) { // word w has some changes in recieved and also sending changes, has to resolve possible conflicts
                 if (changes[0].type === Type.DELETE && changes.length === 1) { // deleting of word
-                    
-                    if (wordsSendingChanges[wordsSendingChanges.length - 1].type !== Type.ADD) {
-                        recievedMerged = recievedMerged.concat(changes)
-                    }
 
-                    sendingMerged = sendingMerged.concat(wordsSendingChanges)
+                    if (wordsSendingChanges[0].type === Type.DELETE && wordsSendingChanges.length === 1) { // DELETE
+                        // doing nothing
+                    } else if (wordsSendingChanges[0].type === Type.DELETE && wordsSendingChanges.length > 1) { // DELETE, ADD, ...
+                        sendingMerged = sendingMerged.concat(wordsSendingChanges.slice(1, wordsSendingChanges.length)) // send without del
+                    } else if (wordsSendingChanges[0].type === Type.ADD) { // ADD, ...
+                        sendingMerged = sendingMerged.concat(wordsSendingChanges)
+                        recievedMerged = recievedMerged.concat(changes.concat(wordsSendingChanges))
+                    }
 
                 } else if (changes[0].type === Type.DELETE && changes.length > 1) { // editing of word
 
@@ -151,8 +154,8 @@ class DictionaryController {
                         sendingMerged = sendingMerged.concat(wordsSendingChanges.slice(1, wordsSendingChanges.length))
                         recievedMerged = recievedMerged.concat(changes.slice(1, changes.length))
                     } else if (wordsSendingChanges[0].type === Type.ADD) { // ADD, ...
-                            sendingMerged = sendingMerged.concat(wordsSendingChanges)
-                            recievedMerged = recievedMerged.concat(changes.concat(wordsSendingChanges))
+                        sendingMerged = sendingMerged.concat(wordsSendingChanges)
+                        recievedMerged = recievedMerged.concat(changes.concat(wordsSendingChanges))
                     }
 
                 } else if (changes[0].type === Type.ADD) { // adding of word
@@ -160,12 +163,11 @@ class DictionaryController {
                     if (wordsSendingChanges[0].type === Type.DELETE && wordsSendingChanges.length === 1) { // DELETE
                         sendingMerged = sendingMerged.concat(wordsSendingChanges)
                     } else if (wordsSendingChanges[0].type === Type.DELETE && wordsSendingChanges.length > 1) { // DELETE, ADD, ...
-                        // removes delete from both
                         sendingMerged = sendingMerged.concat(wordsSendingChanges.concat(changes))
                         recievedMerged = recievedMerged.concat(changes)
                     } else if (wordsSendingChanges[0].type === Type.ADD) { // ADD, ...
-                            sendingMerged = sendingMerged.concat(wordsSendingChanges)
-                            recievedMerged = recievedMerged.concat(changes)
+                        sendingMerged = sendingMerged.concat(wordsSendingChanges)
+                        recievedMerged = recievedMerged.concat(changes)
                     }
                 }
 

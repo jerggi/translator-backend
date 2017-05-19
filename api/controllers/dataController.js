@@ -43,7 +43,7 @@ function isPunct(ch) {
         case '*':
         case '+':
         case ',':
-        case '-':
+        case '-': // ok
         case '.':
         case '/':
         case ':':
@@ -58,7 +58,7 @@ function isPunct(ch) {
         case ']':
         case '^':
         case '_':
-        case '`':
+        case '`': // ok
         case '{':
         case '|':
         case '}':
