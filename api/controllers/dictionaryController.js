@@ -65,9 +65,12 @@ class DictionaryController {
         let recievedChanges = changes
         console.log('RECIEVED CHANGES', recievedChanges)
 
+        let mergedChanges
+
         if (Array.isArray(recievedChanges) && recievedChanges.length > 0) {
-            // recievedChanges = this.filterConflicts(recievedChanges, changesToSend)
-            recievedChanges = this.reduceChanges(recievedChanges)
+            mergedChanges = this.mergeChanges(recievedChanges, changesToSend)
+            changesToSend = mergedChanges.sending
+            recievedChanges = mergedChanges.recieved
 
             console.log('ADDING CHANGES', recievedChanges)
             
@@ -122,14 +125,80 @@ class DictionaryController {
         return reducedChanges
     }
 
-    filterConflicts (recievedChanges, changesToSend) {
-        return _.filter(recievedChanges, (recieved) => {
-            const lastChangeToWord = _.findLast(changesToSend, (toSend) => {
-                return recieved.word === toSend.word
-            })
+    mergeChanges(recievedChanges, sendingChanges) {
+        let recievedMerged = []
+        let sendingMerged = []
+        const recievedWords = this.separateWords(recievedChanges)
+        const sendingWords = this.separateWords(sendingChanges)
 
-            return lastChangeToWord === undefined
+        _.forEach(recievedWords, (changes, recievedWord) => {
+            const wordsSendingChanges = sendingWords[recievedWord]
+            if (wordsSendingChanges) { // word w has some changes in recieved and also sending changes, has to resolve possible conflicts
+                if (changes[0].type === Type.DELETE && changes.length === 1) { // deleting of word
+                    
+                    if (wordsSendingChanges[wordsSendingChanges.length - 1].type !== Type.ADD) {
+                        recievedMerged = recievedMerged.concat(changes)
+                    }
+
+                    sendingMerged = sendingMerged.concat(wordsSendingChanges)
+
+                } else if (changes[0].type === Type.DELETE && changes.length > 1) { // editing of word
+
+                    if (wordsSendingChanges[0].type === Type.DELETE && wordsSendingChanges.length === 1) { // DELETE
+                        sendingMerged = sendingMerged.concat(wordsSendingChanges)
+                    } else if (wordsSendingChanges[0].type === Type.DELETE && wordsSendingChanges.length > 1) { // DELETE, ADD, ...
+                        // removes delete from both
+                        sendingMerged = sendingMerged.concat(wordsSendingChanges.slice(1, wordsSendingChanges.length))
+                        recievedMerged = recievedMerged.concat(changes.slice(1, changes.length))
+                    } else if (wordsSendingChanges[0].type === Type.ADD) { // ADD, ...
+                            sendingMerged = sendingMerged.concat(wordsSendingChanges)
+                            recievedMerged = recievedMerged.concat(changes.concat(wordsSendingChanges))
+                    }
+
+                } else if (changes[0].type === Type.ADD) { // adding of word
+
+                    if (wordsSendingChanges[0].type === Type.DELETE && wordsSendingChanges.length === 1) { // DELETE
+                        sendingMerged = sendingMerged.concat(wordsSendingChanges)
+                    } else if (wordsSendingChanges[0].type === Type.DELETE && wordsSendingChanges.length > 1) { // DELETE, ADD, ...
+                        // removes delete from both
+                        sendingMerged = sendingMerged.concat(wordsSendingChanges.concat(changes))
+                        recievedMerged = recievedMerged.concat(changes)
+                    } else if (wordsSendingChanges[0].type === Type.ADD) { // ADD, ...
+                            sendingMerged = sendingMerged.concat(wordsSendingChanges)
+                            recievedMerged = recievedMerged.concat(changes)
+                    }
+                }
+
+                delete sendingWords[recievedWord]
+            } else {
+                recievedMerged = recievedMerged.concat(changes)
+            }            
         })
+
+        _.forEach(sendingWords, (changes, sendingWord) => {
+            sendingMerged = sendingMerged.concat(changes)
+        })
+
+        return {recieved: recievedMerged, sending: sendingMerged}
+
+    }
+
+    separateWords (changes) {
+        const obj = {}
+
+        changes.forEach((ch, index) => {        
+            if (obj[ch.word]) {
+                if (ch.type === Type.DELETE) {
+                    obj[ch.word] = [ch] // removing changes before del, they are not relevant
+                } else {
+                    obj[ch.word].push(ch)
+                }
+            } else {
+                obj[ch.word] = [ch]
+            }
+        })
+        
+        return obj
     }
 
     parseToString(words) {
