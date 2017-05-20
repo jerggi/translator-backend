@@ -1,5 +1,6 @@
 module.exports = {
     'LEVENSHTEIN_LIMIT': 2,
+    'LEVENSHTEIN_LIMIT_SHORT': 1,
     'HTTP_CODES': {
         'OK': 200,
         'CREATED': 201,

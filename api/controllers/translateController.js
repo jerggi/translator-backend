@@ -24,7 +24,7 @@ class TranslateController {
                 _.forEach(dict.words, (translation, key) => {
                     let distance = levenshteinDist(word, key)
 
-                    if (distance < C.LEVENSHTEIN_LIMIT) {
+                    if (distance <= (word.length > 3 ? C.LEVENSHTEIN_LIMIT : C.LEVENSHTEIN_LIMIT_SHORT)) {
                         translations.push({ word, key, translation, distance, dict: dict.name })
                     }
                 })
