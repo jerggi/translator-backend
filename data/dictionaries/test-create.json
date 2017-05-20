@@ -1,0 +1,15 @@
+{
+  "name": "test-create",
+  "words": {
+    "ein": "one",
+    "zwei": "two",
+    "drei": "three",
+    "daco": "daco",
+    "daco1": "daco",
+    "daco2": "daco",
+    "daco3": "daco"
+  },
+  "createdAt": 1495290444710,
+  "lastEditedAt": 1495290542671,
+  "wordCount": 7
+}

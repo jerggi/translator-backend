@@ -5,7 +5,7 @@ const fs = require('fs')
 const Type = require('./constants')
 const mixins = require('./mixins')
 
-const storagePath = path.join('data', 'dicts')
+const storagePath = path.join('data', 'dictionaries')
 const metaPath = path.join('data', '_meta')
 
 class Model {
@@ -16,23 +16,21 @@ class Model {
 
     getDictList () {
         return _.map(this.data, dict => {
-            const name = dict.get('name').value()
-            const currRevision = this.meta[name] ? this.meta[name].get('revisions').last().value() : 1
+            const obj = dict.getState()
+            const currRevision = this.meta[obj.name] ? this.meta[obj.name].get('revisions').last().value() : 1
 
             return {
-                name,
-                revision: currRevision.revision
+                name: obj.name,
+                revision: currRevision.revision,
+                wordCount: obj.wordCount,
+                createdAt: obj.createdAt,
+                lastEditedAt: obj.lastEditedAt,
             }
         })
     }
 
     test (dict) {
         return this.data[dict].get('words').value()
-    }
-
-    // move logic to controller
-    findTranslations (dict) {
-        return this.data[dict].get('neviemus')
     }
 
     findDictionary (dict) {
@@ -94,9 +92,12 @@ class Model {
     }
 
     setParams (dict, params) {
+        const date = Date.now()
+
         this.data[dict]
             .set('wordCount', params.wordCount)
-            .set('lastEditedAt', Date.now())
+            .set('lastEditedAt', date)
+            .write()
     }
 
     addWord (dict, word, translation, mergedTranslation) {
@@ -104,6 +105,7 @@ class Model {
         this.meta[dict]
             .get('revisions')
             .push({ revision: currRevision + 1, changes: { type: Type.ADD, word, translation } })
+            .removeOldChanges()
             .write()
         
         this.data[dict]
@@ -118,6 +120,7 @@ class Model {
             .get('revisions')
             .push({ revision: currRevision + 1, changes: { type: Type.DELETE, word } })
             .push({ revision: currRevision + 2, changes: { type: Type.ADD, word: newWord ? newWord : word, translation: newTranslation } })
+            .removeOldChanges()
             .write()
 
         if (newWord && newWord !== word) {
@@ -139,6 +142,7 @@ class Model {
         this.meta[dict]
             .get('revisions')
             .push({ revision: currRevision + 1, changes: { type: Type.DELETE, word } })
+            .removeOldChanges()
             .write()
 
         this.data[dict]

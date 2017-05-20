@@ -24,7 +24,7 @@ class WordController {
         }
         
         Db.data.addWord(dict, word, trToSet, mergedTranslation)
-        Db.data.setParams(dict, { wordCount: Db.data.getWordCount(dict) + mergedTranslation ? 0 : 1 })
+        Db.data.setParams(dict, { wordCount: Db.data.getWordCount(dict) + (mergedTranslation ? 0 : 1) })
 
         return { code: codes.CREATED }
     }
@@ -44,17 +44,17 @@ class WordController {
             return { error: `Word '${word}' not found in dictionary.`, code: codes.BAD_REQUEST }
         }
 
-        const wordToSet = newWord ? newWord : null
+        const wordToSet = (newWord && newWord !== word) ? newWord : null
         const trToSet = newTranslation
         let mergedTranslation = null
-        let wordCountChange = 0
 
-        if (wordToSet && wordToSet !== word && foundDict.words[wordToSet]) {
+        if (wordToSet && foundDict.words[wordToSet]) {
             mergedTranslation = mergeTranslations(foundDict.words[wordToSet], newTranslation)
         }
 
+        const wordCountChange = (wordToSet && mergedTranslation === null) ? 1 : 0
         Db.data.changeWord(dict, word, wordToSet, trToSet, mergedTranslation)
-        Db.data.setParams(dict, { wordCount: Db.data.getWordCount(dict) + mergedTranslation ? -1 : 0 }) // solve
+        Db.data.setParams(dict, { wordCount: Db.data.getWordCount(dict) + wordCountChange })
 
         return { code: codes.NO_CONTENT }
     }
@@ -66,7 +66,6 @@ class WordController {
             return { error: `Dictionary '${dict}' not found.`, code: codes.BAD_REQUEST }
         }
 
-        // think about it - should at least save this change to metadata ?
         if (!foundDict.words[word]) {
             return { error: `Word '${word}' not found in dictionary.`, code: codes.BAD_REQUEST }
         }

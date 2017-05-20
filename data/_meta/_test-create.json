@@ -1,31 +1,19 @@
 {
   "revisions": [
     {
-      "revision": 1,
-      "changes": null
-    },
-    {
-      "revision": 2,
-      "changes": {
-        "type": "ADD_WORD",
-        "word": "ein",
-        "translation": "one"
-      }
-    },
-    {
-      "revision": 3,
-      "changes": {
-        "type": "ADD_WORD",
-        "word": "zwei",
-        "translation": "two"
-      }
-    },
-    {
       "revision": 4,
       "changes": {
-        "type": "ADD_WORD",
-        "word": "drei",
-        "translation": "three"
+        "type": "add",
+        "word": "daco2",
+        "translation": "daco"
+      }
+    },
+    {
+      "revision": 5,
+      "changes": {
+        "type": "add",
+        "word": "daco3",
+        "translation": "daco"
       }
     }
   ]

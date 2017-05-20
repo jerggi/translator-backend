@@ -1,3 +1,5 @@
+const CHANGES_LIMIT = 50
+
 function createMixins(db) {
     db._.mixin({
         findLatestChanges: function(revs, revision) {
@@ -8,6 +10,11 @@ function createMixins(db) {
             }
 
             return null
+        },
+        removeOldChanges: function(revs) {
+            while (revs.length > CHANGES_LIMIT) {
+                revs.shift()
+            }
         }
     })
 

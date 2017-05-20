@@ -5,7 +5,7 @@ const path = require('path')
 const Model = require('./Model')
 const mixins = require('./mixins')
 
-const storagePath = path.join('data', 'dicts')
+const storagePath = path.join('data', 'dictionaries')
 const metaPath = path.join('data', '_meta')
 
 let dicts
